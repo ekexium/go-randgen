@@ -107,7 +107,7 @@ maybe_write_limit: | [weight=2] order by c_int, c_str, c_double, c_decimal limit
 col_list: c_int, c_str, c_double, c_decimal, c_datetime, c_timestamp
 
 common_select:
-    select col_list from t where expr
+    select col_list from t where expr order by c_int, c_str, c_double, c_decimal
 
 agg_select:
     select count(*) from t where c_timestamp between { t = T.c_timestamp.rand(); printf("'%s'", t) } and date_add({ printf("'%s'", t) }, interval 15 day)
@@ -138,36 +138,36 @@ common_delete:
  |  [weight=0.8] delete from t where c_timestamp is null or c_double is null maybe_write_limit
 
 expr:
-    expr OR expr
-  | expr || expr
-  | expr XOR expr
-  | expr AND expr
-  | expr && expr
-  | [weight=2] NOT expr
-  | [weight=2] ! expr
-  | [weight=10] boolean_primary IS maybe_not true_or_false_or_unknown
-  | [weight=10] boolean_primary
+    (expr) OR (expr)
+  | (expr) || (expr)
+  | (expr) XOR (expr)
+  | (expr) AND (expr)
+  | (expr) && (expr)
+  | [weight=2] NOT (expr)
+  | [weight=2] ! (expr)
+  | [weight=10] (boolean_primary) IS maybe_not true_or_false_or_unknown
+  | [weight=10] (boolean_primary)
 
 boolean_primary:
-    boolean_primary IS maybe_not NULL
-  | boolean_primary <=> predicate
-  | boolean_primary comparison_operator boolean_primary
-  | [weight=5] numeric_expr comparison_operator numeric_expr
+    (boolean_primary) IS maybe_not NULL
+  | (boolean_primary) <=> (predicate)
+  | (boolean_primary) comparison_operator (boolean_primary)
+  | [weight=5] (numeric_expr) comparison_operator (numeric_expr)
   | [weight=5] predicate
 
 comparison_operator: = | >= | > | <= | < | <> | !=
 
 predicate:
-    numeric_expr maybe_not BETWEEN numeric_expr AND numeric_expr
+    (numeric_expr) maybe_not BETWEEN (numeric_expr) AND (numeric_expr)
 
-numeric_expr:
-  numeric_expr + numeric_expr
-  | numeric_expr - numeric_expr
-  | numeric_expr * numeric_expr
-  | numeric_expr / numeric_expr
-  | numeric_expr DIV numeric_expr
-  | numeric_expr MOD numeric_expr
-  | numeric_expr % numeric_expr
+(numeric_expr):
+    (numeric_expr) + (numeric_expr)
+  | (numeric_expr) - (numeric_expr)
+  | (numeric_expr) * (numeric_expr)
+  | (numeric_expr) / (numeric_expr)
+  | (numeric_expr) DIV (numeric_expr)
+  | (numeric_expr) MOD (numeric_expr)
+  | (numeric_expr) % (numeric_expr)
   | [weight=10] simple_expr
 
 simple_expr:
