@@ -9,6 +9,7 @@
         c_timestamp = { range = util.range(1577836800, 1593561599) },
         c_double = { range = util.range(100) },
         c_decimal = { range = util.range(10) },
+        table_name = uuid.New().String(),
     }
 
     T.c_int.rand = function() return T.c_int.seq:rand() end
@@ -18,7 +19,6 @@
     T.c_double.rand = function() return T.c_double.range:randf() end
     T.c_decimal.rand = function() return T.c_decimal.range:randf() end
 
-    table_name = uuid.New().String()
 }
 
 init: create_table; insert_data
