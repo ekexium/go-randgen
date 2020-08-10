@@ -162,9 +162,6 @@ predicate:
   | [weight=5] bit_expr
 
 bit_expr:
-  | bit_expr & bit_expr
-  | bit_expr << bit_expr
-  | bit_expr >> bit_expr
   | bit_expr + bit_expr
   | bit_expr - bit_expr
   | bit_expr * bit_expr
@@ -172,7 +169,6 @@ bit_expr:
   | bit_expr DIV bit_expr
   | bit_expr MOD bit_expr
   | bit_expr % bit_expr
-  | bit_expr ^ bit_expr
   | [weight=10] simple_expr
 
 simple_expr:
