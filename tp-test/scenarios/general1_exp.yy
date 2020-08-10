@@ -161,7 +161,7 @@ predicate:
     numeric_expr maybe_not BETWEEN numeric_expr AND numeric_expr
 
 numeric_expr:
-  | numeric_expr + numeric_expr
+  numeric_expr + numeric_expr
   | numeric_expr - numeric_expr
   | numeric_expr * numeric_expr
   | numeric_expr / numeric_expr
