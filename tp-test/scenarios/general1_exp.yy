@@ -111,7 +111,7 @@ common_select:
 
 maybe_col_exps: 
   |
-  numeric_col_exprs
+  , numeric_col_exprs
 
 agg_select:
     select count(*) from t where c_timestamp between { t = T.c_timestamp.rand(); printf("'%s'", t) } and date_add({ printf("'%s'", t) }, interval 15 day)
