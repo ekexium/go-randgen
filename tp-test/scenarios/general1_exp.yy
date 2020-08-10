@@ -151,24 +151,23 @@ expr:
 boolean_primary:
     boolean_primary IS maybe_not NULL
   | boolean_primary <=> predicate
-  | boolean_primary comparison_operator predicate
+  | boolean_primary comparison_operator boolean_primary
+  | [weight=5] numeric_expr comparison_operator numeric_expr
   | [weight=5] predicate
 
 comparison_operator: = | >= | > | <= | < | <> | !=
 
 predicate:
-  bit_expr maybe_not IN (at_least_one_exprs)
-  | bit_expr maybe_not BETWEEN bit_expr AND predicate
-  | [weight=5] bit_expr
+    numeric_expr maybe_not BETWEEN numeric_expr AND numeric_expr
 
-bit_expr:
-  | bit_expr + bit_expr
-  | bit_expr - bit_expr
-  | bit_expr * bit_expr
-  | bit_expr / bit_expr
-  | bit_expr DIV bit_expr
-  | bit_expr MOD bit_expr
-  | bit_expr % bit_expr
+numeric_expr:
+  | numeric_expr + numeric_expr
+  | numeric_expr - numeric_expr
+  | numeric_expr * numeric_expr
+  | numeric_expr / numeric_expr
+  | numeric_expr DIV numeric_expr
+  | numeric_expr MOD numeric_expr
+  | numeric_expr % numeric_expr
   | [weight=10] simple_expr
 
 simple_expr:
@@ -178,8 +177,6 @@ simple_expr:
 numeric_literal: rand_c_int | rand_c_double | rand_c_decimal
 
 numeric_col: t.c_int | t.c_double | t.c_decimal
-
-at_least_one_exprs: expr | expr, at_least_one_exprs
 
 maybe_not: | NOT
 
