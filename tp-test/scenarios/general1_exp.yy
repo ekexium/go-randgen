@@ -102,12 +102,12 @@ rand_query:
  |  common_delete; common_insert; common_update
 
 maybe_for_update: | for update
-maybe_write_limit: | [weight=2] order by c_int, c_str, c_double, c_decimal limit { print(math.random(3)) }
+maybe_write_limit: | [weight=2] order by c_int, c_str, c_double, c_decimal, c_datetime, c_timestamp limit { print(math.random(3)) }
 
 col_list: c_int, c_str, c_double, c_decimal, c_datetime, c_timestamp
 
 common_select:
-    select col_list from t where expr order by c_int, c_str, c_double, c_decimal
+    select col_list from t where expr order by c_int, c_str, c_double, c_decimal, c_datetime, c_timestamp
 
 agg_select:
     select count(*) from t where c_timestamp between { t = T.c_timestamp.rand(); printf("'%s'", t) } and date_add({ printf("'%s'", t) }, interval 15 day)
