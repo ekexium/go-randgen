@@ -290,7 +290,7 @@ func whyTestCmd(g *global) *cobra.Command {
 
 			fmt.Println("\n## history")
 
-			fmt.Println("\n```")
+			fmt.Println("\n```sql")
 			dumpStmts(seq)
 			fmt.Println("```")
 
