@@ -102,7 +102,7 @@ func setup(L *lua.LState, out io.Writer) error {
 		return 1
 	}))
 	L.SetGlobal("uuid", L.NewFunction(func(L *lua.LState) int {
-		n := uuid.New().String()
+		n := strings.ReplaceAll(uuid.New().String(), "-", "_")
 		L.Push(lua.LString(n))
 		return 1
 	}))
