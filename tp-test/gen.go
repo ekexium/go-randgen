@@ -8,11 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
 	lua "github.com/yuin/gopher-lua"
 	luaparse "github.com/yuin/gopher-lua/parse"
-
-	sqlgen "github.com/pingcap/go-randgen/grammar/sql_generator"
 )
 
 //go:generate go run modernc.org/assets -d lib/ -o lib.generated.go --map luaLibs
@@ -98,11 +95,6 @@ func setup(L *lua.LState, out io.Writer) error {
 	}))
 	L.SetGlobal("random_name", L.NewFunction(func(L *lua.LState) int {
 		n := adjectives[rand.Intn(len(adjectives))] + " " + surnames[rand.Intn(len(surnames))]
-		L.Push(lua.LString(n))
-		return 1
-	}))
-	L.SetGlobal("uuid", L.NewFunction(func(L *lua.LState) int {
-		n := strings.ReplaceAll(uuid.New().String(), "-", "_")
 		L.Push(lua.LString(n))
 		return 1
 	}))

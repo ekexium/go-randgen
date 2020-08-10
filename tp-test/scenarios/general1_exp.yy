@@ -107,7 +107,11 @@ maybe_write_limit: | [weight=2] order by c_int, c_str, c_double, c_decimal, c_da
 col_list: c_int, c_str, c_double, c_decimal, c_datetime, c_timestamp
 
 common_select:
-    select col_list from t where expr order by c_int, c_str, c_double, c_decimal, c_datetime, c_timestamp
+    select col_list maybe_col_exps from t where expr order by c_int, c_str, c_double, c_decimal, c_datetime, c_timestamp
+
+maybe_col_exps: 
+  |
+  numeric_col_exprs
 
 agg_select:
     select count(*) from t where c_timestamp between { t = T.c_timestamp.rand(); printf("'%s'", t) } and date_add({ printf("'%s'", t) }, interval 15 day)
@@ -159,6 +163,19 @@ comparison_operator: = | >= | > | <= | < | <> | !=
 
 predicate:
     numeric_expr maybe_not BETWEEN numeric_expr AND numeric_expr
+
+numeric_col_exprs:
+    [weight=2] numeric_col_expr | numeric_col_expr, numeric_col_exprs
+
+numeric_col_expr:
+    numeric_col_expr + numeric_col_expr
+  | numeric_col_expr - numeric_col_expr
+  | numeric_col_expr * numeric_col_expr
+  | numeric_col_expr / numeric_col_expr
+  | numeric_col_expr DIV numeric_col_expr
+  | numeric_col_expr MOD numeric_col_expr
+  | numeric_col_expr % numeric_col_expr
+  | [weight=15] numeric_col
 
 numeric_expr:
     numeric_expr + numeric_expr
