@@ -21,6 +21,8 @@
 
 }
 
+table_name = { printf("'%s'", T.table_name) }
+
 init: create_table; insert_data
 
 txn: rand_queries
@@ -83,6 +85,7 @@ rand_c_timestamp: { printf("'%s'", T.c_timestamp.rand()) }
 rand_c_double: { printf("%.6f", T.c_double.rand()) }
 rand_c_decimal: { printf("%.3f", T.c_decimal.rand()) }
 
+
 union_or_union_all: union | union all
 insert_or_replace: insert | replace
 
@@ -144,4 +147,4 @@ common_delete:
  |  delete from table_name where c_decimal > c_double/2 maybe_write_limit
  |  [weight=0.8] delete from table_name where c_timestamp is null or c_double is null maybe_write_limit
 
-table_name = { print(T.table_name) }
+
