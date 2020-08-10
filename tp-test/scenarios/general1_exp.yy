@@ -143,32 +143,32 @@ expr:
   | (expr) XOR (expr)
   | (expr) AND (expr)
   | (expr) && (expr)
-  | [weight=2] NOT (expr)
-  | [weight=2] ! (expr)
-  | [weight=10] (boolean_primary) IS maybe_not true_or_false_or_unknown
+  |  NOT (expr)
+  | !(expr)
+  | [weight=10] (boolean_primary) IS maybe_not true_or_false
   | [weight=10] (boolean_primary)
 
 boolean_primary:
     (boolean_primary) IS maybe_not NULL
-  | (boolean_primary) <=> (predicate)
+  | (boolean_primary) <=> (boolean_primary)
   | (boolean_primary) comparison_operator (boolean_primary)
-  | [weight=5] (numeric_expr) comparison_operator (numeric_expr)
+  | [weight=5] numeric_expr comparison_operator numeric_expr
   | [weight=5] predicate
 
 comparison_operator: = | >= | > | <= | < | <> | !=
 
 predicate:
-    (numeric_expr) maybe_not BETWEEN (numeric_expr) AND (numeric_expr)
+    numeric_expr maybe_not BETWEEN numeric_expr AND numeric_expr
 
 numeric_expr:
-    (numeric_expr) + (numeric_expr)
-  | (numeric_expr) - (numeric_expr)
-  | (numeric_expr) * (numeric_expr)
-  | (numeric_expr) / (numeric_expr)
-  | (numeric_expr) DIV (numeric_expr)
-  | (numeric_expr) MOD (numeric_expr)
-  | (numeric_expr) % (numeric_expr)
-  | [weight=10] simple_expr
+    numeric_expr + numeric_expr
+  | numeric_expr - numeric_expr
+  | numeric_expr * numeric_expr
+  | numeric_expr / numeric_expr
+  | numeric_expr DIV numeric_expr
+  | numeric_expr MOD numeric_expr
+  | numeric_expr % numeric_expr
+  | [weight=15] simple_expr
 
 simple_expr:
     numeric_literal
@@ -180,5 +180,5 @@ numeric_col: t.c_int | t.c_double | t.c_decimal
 
 maybe_not: | NOT
 
-true_or_false_or_unknown: TRUE | FALSE | UNKNOWN
+true_or_false: TRUE | FALSE
 
