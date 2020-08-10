@@ -25,8 +25,6 @@ init: create_table; insert_data
 
 txn: rand_queries
 
-table_name = { print(T.table_name) }
-
 create_table:
     create table table_name (
         c_int int,
@@ -145,3 +143,5 @@ common_delete:
  |  delete from table_name where c_str is null
  |  delete from table_name where c_decimal > c_double/2 maybe_write_limit
  |  [weight=0.8] delete from table_name where c_timestamp is null or c_double is null maybe_write_limit
+
+table_name = { print(T.table_name) }
