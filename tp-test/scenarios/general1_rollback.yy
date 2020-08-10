@@ -21,7 +21,7 @@
 
 }
 
-table_name = { printf("%s", T.table_name) }
+table_name: { printf("s", T.table_name) }
 
 init: create_table; insert_data
 
