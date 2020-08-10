@@ -9,7 +9,7 @@
         c_timestamp = { range = util.range(1577836800, 1593561599) },
         c_double = { range = util.range(100) },
         c_decimal = { range = util.range(10) },
-        table_name = uuid.New().String(),
+        table_name = uuid()
     }
 
     T.c_int.rand = function() return T.c_int.seq:rand() end

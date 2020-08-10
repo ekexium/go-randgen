@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	lua "github.com/yuin/gopher-lua"
 	luaparse "github.com/yuin/gopher-lua/parse"
 
@@ -97,6 +98,11 @@ func setup(L *lua.LState, out io.Writer) error {
 	}))
 	L.SetGlobal("random_name", L.NewFunction(func(L *lua.LState) int {
 		n := adjectives[rand.Intn(len(adjectives))] + " " + surnames[rand.Intn(len(surnames))]
+		L.Push(lua.LString(n))
+		return 1
+	}))
+	L.SetGlobal("uuid", L.NewFunction(func(L *lua.LState) int {
+		n := uuid.New().String()
 		L.Push(lua.LString(n))
 		return 1
 	}))
