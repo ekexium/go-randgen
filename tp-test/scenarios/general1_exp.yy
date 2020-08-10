@@ -173,8 +173,6 @@ bit_expr:
   | bit_expr MOD bit_expr
   | bit_expr % bit_expr
   | bit_expr ^ bit_expr
-  | bit_expr + interval_expr
-  | bit_expr - interval_expr
   | [weight=10] simple_expr
 
 simple_expr:
@@ -183,7 +181,7 @@ simple_expr:
 
 numeric_literal: rand_c_int | rand_c_double | rand_c_decimal
 
-numeric_col: c_int | c_double | c_decimal
+numeric_col: t.c_int | t.c_double | t.c_decimal
 
 at_least_one_exprs: expr | expr, at_least_one_exprs
 
