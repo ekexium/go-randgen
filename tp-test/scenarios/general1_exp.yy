@@ -149,15 +149,15 @@ expr:
   | (expr) && (expr)
   |  NOT (expr)
   | !(expr)
-  | [weight=10] (boolean_primary) IS maybe_not true_or_false
-  | [weight=10] (boolean_primary)
+  | [weight=20] (boolean_primary) IS maybe_not true_or_false
+  | [weight=20] (boolean_primary)
 
 boolean_primary:
     (boolean_primary) IS maybe_not NULL
   | (boolean_primary) <=> (boolean_primary)
   | (boolean_primary) comparison_operator (boolean_primary)
-  | [weight=5] numeric_expr comparison_operator numeric_expr
-  | [weight=5] predicate
+  | [weight=10] numeric_expr comparison_operator numeric_expr
+  | predicate
 
 comparison_operator: = | >= | > | <= | < | <> | !=
 
@@ -175,7 +175,7 @@ numeric_col_expr:
   | numeric_col_expr DIV numeric_col_expr
   | numeric_col_expr MOD numeric_col_expr
   | numeric_col_expr % numeric_col_expr
-  | [weight=15] numeric_col
+  | [weight=30] numeric_col
 
 numeric_expr:
     numeric_expr + numeric_expr
@@ -189,7 +189,7 @@ numeric_expr:
 
 simple_expr:
     numeric_literal
-  | numeric_col
+  | [weight=3] numeric_col
 
 numeric_literal: rand_c_int | rand_c_double | rand_c_decimal
 
