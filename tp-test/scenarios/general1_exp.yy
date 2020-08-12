@@ -3,7 +3,7 @@
     local util = require("util")
 
     T = {
-        c_int = { seq = util.seq() },
+        c_int = { seq = util.seq(10) },
         c_str = {},
         c_datetime = { range = util.range(1577836800, 1593561599) },
         c_timestamp = { range = util.range(1577836800, 1593561599) },
@@ -100,6 +100,7 @@ rand_query:
  |  common_update; common_delete; common_select
  |  common_insert; common_delete; common_select
  |  common_delete; common_insert; common_update
+ |  rollback;
 
 maybe_for_update: | for update
 maybe_write_limit: | [weight=2] order by c_int, c_str, c_double, c_decimal, c_datetime, c_timestamp limit { print(math.random(3)) }
@@ -156,12 +157,15 @@ boolean_primary:
   | (boolean_primary) <=> (boolean_primary)
   | (boolean_primary) comparison_operator (boolean_primary)
   | [weight=10] numeric_expr comparison_operator numeric_expr
+  | [weight=5] datetime_expr comparison_operator datetime_expr
   | predicate
 
 comparison_operator: = | >= | > | <= | < | <> | !=
 
 predicate:
     numeric_expr maybe_not BETWEEN numeric_expr AND numeric_expr
+  | datetime_expr maybe_not BETWEEN datetime_expr AND datetime_expr
+    
 
 complex_numeric_col_exprs:
     [weight=2] complex_numeric_col_expr | complex_numeric_col_expr, complex_numeric_col_exprs
@@ -194,8 +198,9 @@ agg_exps:
   | agg_exp, agg_exps
 
 agg_exp:
-    [weight=5] numeric_agg_func_name(numeric_col)
-  | COUNT(DISTINCT numeric_col)
+    [weight=5] ROUND(numeric_agg_func_name(numeric_col), 3)
+  | COUNT(DISTINCT any_col)
+  | ROUND(SUM(DISTINCT any_col), 3)
 
 agg_operand: 
     [weight=2] numeric_col 
@@ -205,9 +210,36 @@ numeric_literal: rand_c_int | rand_c_double | rand_c_decimal
 
 numeric_col: t.c_int | t.c_double | t.c_decimal
 
+any_col: c_int | c_str | c_double | c_decimal | c_datetime | c_timestamp
+
 numeric_agg_func_name: AVG | MAX | MIN | SUM | COUNT
 
 maybe_not: | NOT
 
 true_or_false: TRUE | FALSE
+
+datetime_expr:
+    [weight=5] datetime_literal
+  | adddate_expr
+
+adddate_expr: 
+    ADDDATE(datetime_expr, INTERVAL numeric_expr unit)
+  | ADDDATE(datetime_expr, numeric_expr) 
+
+date: 
+    c_datetime
+  | datetime_literal
+
+datetime_literal: rand_c_datetime
+
+unit: 
+    MICROSECOND
+  | SECOND
+  | MINUTE
+  | HOUR
+  | DAY
+  | WEEK
+  | MONTH
+  | QUARTER
+  | YEAR
 
