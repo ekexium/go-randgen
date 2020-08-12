@@ -158,6 +158,7 @@ boolean_primary:
   | (boolean_primary) comparison_operator (boolean_primary)
   | [weight=10] numeric_expr comparison_operator numeric_expr
   | [weight=5] datetime_expr comparison_operator datetime_expr
+  | [weight=5] time_expr comparison_operator time_expr
   | predicate
 
 comparison_operator: = | >= | > | <= | < | <> | !=
@@ -186,6 +187,9 @@ numeric_col_expr:
 numeric_expr:
     numeric_expr numeric_operator numeric_expr
   | [weight=4] simple_expr
+  | ascii_expr
+  | bitlength_expr
+  | length_expr
 
 numeric_operator: + | - | * | DIV | MOD | %
 
@@ -200,7 +204,7 @@ agg_exps:
 agg_exp:
     [weight=5] ROUND(numeric_agg_func_name(numeric_col), 3)
   | COUNT(DISTINCT any_col)
-  | ROUND(SUM(DISTINCT any_col), 3)
+  | ROUND(SUM(DISTINCT numeric_col), 3)
 
 agg_operand: 
     [weight=2] numeric_col 
@@ -220,17 +224,31 @@ true_or_false: TRUE | FALSE
 
 datetime_expr:
     [weight=5] datetime_literal
-  | adddate_expr
+  | c_datetime
+  | [weight=0.3] date
 
 adddate_expr: 
-    ADDDATE(datetime_expr, INTERVAL numeric_expr unit)
-  | ADDDATE(datetime_expr, numeric_expr) 
+    ADDDATE(date_expr, INTERVAL numeric_expr unit)
+  | ADDDATE(date_expr, numeric_expr) 
 
 date: 
-    c_datetime
-  | datetime_literal
+    date_expr
+  | datediff_expr
 
-datetime_literal: rand_c_datetime
+date_expr: 
+    [weight=3] date_literal
+  | [weight=0.5] DATE(datetime_expr)
+  | adddate_expr
+
+date_literal:
+    [weight=0.1] CURDATE()
+  | [weight=0.1] CURRENT_DATE()
+  | [weight=0.1] CURRENT_DATE
+
+datediff_expr: DATEDIFF(datetime_expr, datetime_expr)
+
+datetime_literal: 
+    rand_c_datetime
 
 unit: 
     MICROSECOND
@@ -243,3 +261,64 @@ unit:
   | QUARTER
   | YEAR
 
+time_expr: 
+    [weight=4] time_literal
+  | addtime_expr
+  | [weight=0.3] converttz_expr
+  | timestamp_expr
+  | TIME(timestamp_expr)
+  | TIME(datetime_expr)
+
+addtime_expr: ADDTIME(time_expr, time_expr)
+
+converttz_expr: CONVERT_TZ(time_expr, timezone_expr, timezone_expr)
+
+timezone_expr: {print("'")}plus_or_minus timezone_number minutes
+
+minutes: 
+    {print(":00'")}
+  | {print(":30'")}
+  | {print(":13'")}
+  | {print(":41'")}
+
+plus_or_minus: + | -
+
+timezone_number: 00 | 01 | 02 | 03 | 04 | 05 | 06 | 07 | 08 | 09 | 10 | 11 | 12
+
+time_literal: 
+    CURTIME()
+  | CURRENT_TIME()
+  | CURRENT_TIME
+
+timestamp_expr: 
+    c_timestamp
+  | NOW()
+  | rand_c_timestamp
+
+str_exprs:
+    str_expr
+  | str_expr, str_exprs
+
+str_expr: 
+    [weight=5] str_literal
+  | concat_expr
+  | [weight=5]c_str
+  | bin_exp
+
+concat_expr:
+    CONCAT(str_exprs)
+
+str_literal:
+    rand_c_str
+
+ascii_expr: 
+    ASCII(str_expr)
+
+bin_exp:
+    BIN(numeric_expr)
+
+bitlength_expr:
+    BIT_LENGTH(str_expr)
+
+length_expr:
+    LENGTH(str_expr)
