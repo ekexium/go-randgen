@@ -165,7 +165,7 @@ comparison_operator: = | >= | > | <= | < | <> | !=
 
 predicate:
     numeric_expr maybe_not BETWEEN numeric_expr AND numeric_expr
-  | datetime_expr maybe_not BETWEEN datetime_expr AND datetime_expr
+  | datetime_expr maybe_not BETWEEN datetime_literal AND datetime_literal
     
 
 complex_numeric_col_exprs:
@@ -225,7 +225,7 @@ true_or_false: TRUE | FALSE
 datetime_expr:
     [weight=5] datetime_literal
   | c_datetime
-  | [weight=0.3] date
+  | [weight=0] date
 
 adddate_expr: 
     ADDDATE(date_expr, INTERVAL numeric_expr unit)
@@ -265,7 +265,7 @@ time_expr:
     [weight=4] time_literal
   | addtime_expr
   | [weight=0.3] converttz_expr
-  | timestamp_expr
+  | [weight=0] timestamp_expr
   | TIME(timestamp_expr)
   | TIME(datetime_expr)
 
