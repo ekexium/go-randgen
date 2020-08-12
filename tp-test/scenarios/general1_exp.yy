@@ -107,15 +107,15 @@ maybe_write_limit: | [weight=2] order by c_int, c_str, c_double, c_decimal, c_da
 col_list: c_int, c_str, c_double, c_decimal, c_datetime, c_timestamp
 
 common_select:
-    select col_list maybe_col_exps from t where expr order by c_int, c_str, c_double, c_decimal, c_datetime, c_timestamp
+    select col_list maybe_col_exps from t where expr order by col_list
 
 maybe_col_exps: 
-  |
-  , numeric_col_exprs
+  |, complex_numeric_col_exprs
 
 agg_select:
     select count(*) from t where c_timestamp between { t = T.c_timestamp.rand(); printf("'%s'", t) } and date_add({ printf("'%s'", t) }, interval 15 day)
  |  select sum(c_int) from t where c_datetime between { t = T.c_datetime.rand(); printf("'%s'", t) } and date_add({ printf("'%s'", t) }, interval 15 day)
+ |  select agg_exp from t where expr
 
 common_update:
     update t set c_str = rand_c_str where c_int = rand_c_int
@@ -143,7 +143,6 @@ common_delete:
 
 expr:
     (expr) OR (expr)
-  | (expr) || (expr)
   | (expr) XOR (expr)
   | (expr) AND (expr)
   | (expr) && (expr)
@@ -164,36 +163,49 @@ comparison_operator: = | >= | > | <= | < | <> | !=
 predicate:
     numeric_expr maybe_not BETWEEN numeric_expr AND numeric_expr
 
-numeric_col_exprs:
-    [weight=2] numeric_col_expr | numeric_col_expr, numeric_col_exprs
+complex_numeric_col_exprs:
+    [weight=2] complex_numeric_col_expr | complex_numeric_col_expr, complex_numeric_col_exprs
 
-numeric_col_expr:
-    numeric_col_expr + numeric_col_expr
-  | numeric_col_expr - numeric_col_expr
-  | numeric_col_expr * numeric_col_expr
-  | numeric_col_expr / numeric_col_expr
-  | numeric_col_expr DIV numeric_col_expr
-  | numeric_col_expr MOD numeric_col_expr
-  | numeric_col_expr % numeric_col_expr
-  | [weight=30] numeric_col
+complex_numeric_col_expr:
+    numeric_col_expr numeric_operator numeric_col_expr
+  | rand_c_int numeric_operator numeric_col_expr
+  | numeric_col_expr numeric_operator rand_c_int
+
+
+numeric_col_expr:       
+    numeric_col_expr numeric_operator numeric_col_expr
+  | rand_c_int numeric_operator numeric_col_expr
+  | numeric_col_expr numeric_operator rand_c_int
+  | [weight=4] c_int
+  
 
 numeric_expr:
-    numeric_expr + numeric_expr
-  | numeric_expr - numeric_expr
-  | numeric_expr * numeric_expr
-  | numeric_expr / numeric_expr
-  | numeric_expr DIV numeric_expr
-  | numeric_expr MOD numeric_expr
-  | numeric_expr % numeric_expr
-  | [weight=15] simple_expr
+    numeric_expr numeric_operator numeric_expr
+  | [weight=4] simple_expr
+
+numeric_operator: + | - | * | DIV | MOD | %
 
 simple_expr:
     numeric_literal
   | [weight=3] numeric_col
 
+agg_exps: 
+    agg_exp
+  | agg_exp, agg_exps
+
+agg_exp:
+    [weight=5] numeric_agg_func_name(numeric_col)
+  | COUNT(DISTINCT numeric_col)
+
+agg_operand: 
+    [weight=2] numeric_col 
+  | *
+
 numeric_literal: rand_c_int | rand_c_double | rand_c_decimal
 
 numeric_col: t.c_int | t.c_double | t.c_decimal
+
+numeric_agg_func_name: AVG | MAX | MIN | SUM | COUNT
 
 maybe_not: | NOT
 
