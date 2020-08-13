@@ -168,8 +168,8 @@ func initDB(db *sqlz.DB) (err error) {
     id char(36) not null,
     init_sql longtext not null,
     status varchar(20),
-    started_at bigint,
-    finished_at bigint,
+    started_at bigint default 0,
+    finished_at bigint default 0,
     message text,
     primary key (id),
     key (status)

@@ -41,7 +41,12 @@ function Range:randt()
     return timef(self:randi())
 end
 
+function choice(items)
+    return items[math.random(#items)]
+end
+
 return {
     seq = Seq.new,
     range = Range.new,
+    choice = choice,
 }

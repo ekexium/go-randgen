@@ -226,8 +226,8 @@ func doTxn(ctx context.Context, opts runABTestOptions, t *Test, i int, tx1 *sql.
 			continue
 		}
 		h1, h2 := "", ""
-		if stmt.IsQuery && rs1.NRows() == rs2.NRows() && rs1.NRows() > 1 &&
-			!strings.Contains(strings.ToLower(stmt.Stmt), "order by") {
+		if q := strings.ToLower(stmt.Stmt); stmt.IsQuery && rs1.NRows() == rs2.NRows() && rs1.NRows() > 1 &&
+			(!strings.Contains(q, "order by") || strings.Contains(q, "force-unordered")) {
 			h1, h2 = unorderedDigest(rs1, nil), unorderedDigest(rs2, nil)
 		} else {
 			h1, h2 = rs1.DataDigest(), rs2.DataDigest()
