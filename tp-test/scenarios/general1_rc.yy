@@ -102,7 +102,8 @@ rand_query:
  |  common_update; common_delete; common_select
  |  common_insert; common_delete; common_select
  |  common_delete; common_insert; common_update
- |  common_select; common_modify; common_select
+ |  common_select maybe_for_update; common_modify; common_select maybe_for_update
+ |  rollback;
 
 common_modify: common_insert | common_update | common_delete
 
