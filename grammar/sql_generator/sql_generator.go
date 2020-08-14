@@ -155,8 +155,14 @@ func (i *SQLRandomlyIterator) PathInfo() *PathInfo {
 	return i.pathInfo
 }
 
-// visitor sqls generted by the iterator
+// Visit visits sqls generted by the iterator
 func (i *SQLRandomlyIterator) Visit(visitor SqlVisitor) error {
+	return i.VisitWithTxnID(visitor, -1)
+}
+
+// VisitWithTxnID is a modified version of original Visit method.
+// txnID is used to support conditional generation in tp-test, -1 means ignoring it.
+func (i *SQLRandomlyIterator) VisitWithTxnID(visitor SqlVisitor, txnID int) error {
 
 	wrapper := func(sql string) bool {
 		res := visitor(sql)
@@ -168,7 +174,7 @@ func (i *SQLRandomlyIterator) Visit(visitor SqlVisitor) error {
 
 	for {
 		_, err := i.generateSQLRandomly(i.productionName, newLinkedMap(), sqlBuffer,
-			false, wrapper)
+			false, wrapper, txnID)
 		if err != nil && err != normalStop {
 			return err
 		}
@@ -275,9 +281,9 @@ func willRecursive(seq *yacc_parser.Seq, set map[string]bool) bool {
 
 func (i *SQLRandomlyIterator) generateSQLRandomly(productionName string,
 	recurCounter *linkedMap, sqlBuffer *bytes.Buffer,
-	parentPreSpace bool, visitor SqlVisitor) (hasWrite bool, err error) {
-	i.pathInfo.Depth += 1
-	defer func() { i.pathInfo.Depth -= 1 }()
+	parentPreSpace bool, visitor SqlVisitor, txnID int) (hasWrite bool, err error) {
+	i.pathInfo.Depth++
+	defer func() { i.pathInfo.Depth-- }()
 	// get root production
 	production, exist := i.productionMap[productionName]
 	if !exist {
@@ -300,9 +306,29 @@ func (i *SQLRandomlyIterator) generateSQLRandomly(productionName string,
 			nearMaxRecur[name] = true
 		}
 	}
+
+	// Checks if the branch should be selected, based on the conditional generation requirement
+	// 1 if allowed, 0 if not allowed
+	allowedTxn := func(txnID int, expectedTxnID int) bool {
+		// rule doesn't care
+		if expectedTxnID == 0 {
+			return true
+		}
+		// caller doesn't care
+		if txnID == -1 {
+			return true
+		}
+		// satisfy the condition
+		if txnID == expectedTxnID-1 {
+			return true
+		}
+		return false
+	}
+
 	selectableSeqs, totalWeight := make([]*yacc_parser.Seq, 0), .0
 	for _, seq := range production.Alter {
-		if seq.Weight > 0 && !willRecursive(seq, nearMaxRecur) {
+		if seq.Weight > 0 && !willRecursive(seq, nearMaxRecur) && allowedTxn(txnID, seq.TxnNum) {
+			// log.Printf("current txn %d, required txn %d, allow %s", txnID, seq.TxnNum-1, seq.String())
 			selectableSeqs = append(selectableSeqs, seq)
 			totalWeight += seq.Weight
 		}
@@ -396,10 +422,10 @@ func (i *SQLRandomlyIterator) generateSQLRandomly(productionName string,
 			var hasSubWrite bool
 			if firstWrite {
 				hasSubWrite, err = i.generateSQLRandomly(item.OriginString(), recurCounter,
-					sqlBuffer, parentPreSpace, visitor)
+					sqlBuffer, parentPreSpace, visitor, txnID)
 			} else {
 				hasSubWrite, err = i.generateSQLRandomly(item.OriginString(), recurCounter,
-					sqlBuffer, item.HasPreSpace(), visitor)
+					sqlBuffer, item.HasPreSpace(), visitor, txnID)
 			}
 
 			if firstWrite && hasSubWrite {

@@ -130,7 +130,7 @@ func runABTest(ctx context.Context, failed chan struct{}, opts runABTestOptions)
 		log.Printf("start executing")
 		// execute all stmts
 		for _, stmt := range stmts {
-			log.Printf("execute: %v", stmt)
+			log.Printf("txn #%d execute: %s", stmt.Txn, stmt.Stmt)
 			if err := executeStmt(ctx, opts, t, db1Txns[stmt.Txn], db2Txns[stmt.Txn], stmt); err != nil {
 				return fail(err)
 			}

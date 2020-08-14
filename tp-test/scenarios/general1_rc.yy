@@ -97,13 +97,13 @@ rand_query:
  |  [weight=0.3] agg_select maybe_for_update
  |  [weight=0.2] (agg_select maybe_for_update) union_or_union_all (agg_select maybe_for_update)
  |  [weight=0.5] common_insert
- |  common_update
- |  common_delete
- |  common_update; common_delete; common_select
- |  common_insert; common_delete; common_select
- |  common_delete; common_insert; common_update
+ |  [txn=0] common_update
+ |  [txn=0] common_delete
+ |  [txn=0] common_update; common_delete; common_select
+ |  [txn=0] common_insert; common_delete; common_select
+ |  [txn=0] common_delete; common_insert; common_update
 
-maybe_for_update: | for update
+maybe_for_update: | [txn=0] for update
 maybe_write_limit: | [weight=2] order by c_int, c_str, c_double, c_decimal limit { print(math.random(3)) }
 
 col_list: c_int, c_str, c_double, c_decimal, c_datetime, c_timestamp

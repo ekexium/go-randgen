@@ -18,6 +18,9 @@ type Seq struct {
 	SNumber int
 	// Attributes
 	Weight float64
+	// Transaction ID+1, used for conditional generation, TxnNum = 0 means any txn.
+	// i.e. the branch will only be generated in txn (TxnNum-1)
+	TxnNum int
 }
 
 func NewSeq(items []Token) (seq *Seq) {
@@ -43,6 +46,16 @@ func (s *Seq) Append(t Token) error {
 		s.Weight = v
 	case "ignore", "omit":
 		s.Weight = 0
+	case "txn":
+		if len(raw) != 2 {
+			return errors.New("invalid attribute string: " + t.OriginString())
+		}
+		v, err := strconv.ParseInt(raw[1], 10, 32)
+		if err != nil {
+			return errors.New("invalid txn number: " + err.Error())
+		}
+		s.TxnNum = int(v + 1)
+		// log.Printf("TxnNum=%d, %v", int(v+1), s)
 	default:
 		return errors.New("unknown attribute string: " + t.OriginString())
 	}

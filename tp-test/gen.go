@@ -46,10 +46,10 @@ func genTest(opts genTestOptions) (test Test, err error) {
 	it.SetRoot(opts.TxnRoot)
 	for i := 0; i < opts.NumTxn; i++ {
 		txn := make(Txn, 0, 8)
-		err = it.Visit(func(sql string) bool {
+		err = it.VisitWithTxnID(func(sql string) bool {
 			txn = append(txn, Stmt{Stmt: sql})
 			return it.PathInfo().Depth != 0
-		})
+		}, i)
 		if err != nil {
 			return Test{}, err
 		}
